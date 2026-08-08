@@ -1,0 +1,14 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aurion-ai-signals"
+version = "0.1.0"
+description = "Minimal source scaffold for Aurion AI Signals."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+
+[project.scripts]
+aurion-ai-signals = "aurion_ai_signals.__main__:main"
