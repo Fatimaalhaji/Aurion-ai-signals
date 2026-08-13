@@ -19,6 +19,48 @@ function closeTrade(trade, candle, reason, rawExit, options) { const exitPrice =
 function advanceTrade(trade, candle, options) { const hitSL = trade.action === 'LONG' ? candle.low <= trade.stopLoss : candle.high >= trade.stopLoss; const hitTP = trade.action === 'LONG' ? candle.high >= trade.takeProfit : candle.low <= trade.takeProfit; if (hitSL && hitTP) return closeTrade(trade, candle, 'SL_AMBIGUOUS', trade.stopLoss, options); if (hitSL) return closeTrade(trade, candle, 'SL', trade.stopLoss, options); if (hitTP) return closeTrade(trade, candle, 'TP', trade.takeProfit, options); return null; }
 function metrics(trades, signals, initialEquity) { let equity = initialEquity, peak = initialEquity, maxDrawdown = 0, cw = 0, cl = 0, consecutiveWins = 0, consecutiveLosses = 0; const equityCurve = [{ timestamp: null, equity }]; for (const t of trades) { equity += t.pnl; peak = Math.max(peak, equity); maxDrawdown = Math.max(maxDrawdown, peak - equity); if (t.pnl > 0) { cw += 1; cl = 0; } else { cl += 1; cw = 0; } consecutiveWins = Math.max(consecutiveWins, cw); consecutiveLosses = Math.max(consecutiveLosses, cl); equityCurve.push({ timestamp: t.exitTime, equity }); } const wins = trades.filter((t) => t.pnl > 0), losses = trades.filter((t) => t.pnl <= 0); const grossProfit = wins.reduce((s,t)=>s+t.pnl,0), grossLoss = losses.reduce((s,t)=>s+t.pnl,0); const by = (a) => trades.filter((t)=>t.action===a); const perf = (arr) => ({ trades: arr.length, wins: arr.filter(t=>t.pnl>0).length, losses: arr.filter(t=>t.pnl<=0).length, netPnl: arr.reduce((s,t)=>s+t.pnl,0) }); return { totalSignals: signals.length, totalTrades: trades.length, winningTrades: wins.length, losingTrades: losses.length, winRate: trades.length ? wins.length / trades.length : 0, grossProfit, grossLoss, netPnl: grossProfit + grossLoss, averageTrade: trades.length ? (grossProfit + grossLoss) / trades.length : 0, profitFactor: grossLoss === 0 ? (grossProfit > 0 ? Infinity : 0) : grossProfit / Math.abs(grossLoss), maxDrawdown, consecutiveWins, consecutiveLosses, longPerformance: perf(by('LONG')), shortPerformance: perf(by('SHORT')), equityCurve }; }
 
-export async function runBacktest(input = {}) { const options = { ...DEFAULT_BACKTEST_OPTIONS, ...input }; const now = options.now ?? Number.MAX_SAFE_INTEGER; const fourHour = normalizeFrame(input.fourHourCandles ?? [], '4H', MS['4h'], now); const oneHour = normalizeFrame(input.oneHourCandles ?? [], '1H', MS['1h'], now); const fifteen = normalizeFrame(input.fifteenMinuteCandles ?? [], '15M', MS['15m'], now); if (options.strictSpacing) { assertAligned(fourHour, '4H', MS['4h']); assertAligned(oneHour, '1H', MS['1h']); assertAligned(fifteen, '15M', MS['15m']); } const period = { start: fifteen[0].time, end: fifteen.at(-1).time, partitions: options.partitions ?? null }; const signals = [], trades = []; let open = null; for (const candle of fifteen) { if (open && candle.time > open.entryTime) { const closed = advanceTrade(open, candle, options); if (closed) { trades.push(closed); open = null; } } const at = candle.closeTime ?? candle.time + MS['15m'] - 1; const f4 = completedAt(fourHour, at, MS['4h']); const h1 = completedAt(oneHour, at, MS['1h']); const m15 = completedAt(fifteen, at, MS['15m']); if (f4.length < MINIMUM_CANDLES.analysis || h1.length < MINIMUM_CANDLES.analysis || m15.length < MINIMUM_CANDLES.analysis) continue; const provider = { getTicker: async () => ({ lastPrice: String(candle.close), priceChangePercent: '0', quoteVolume: String(candle.volume) }), getCandles: async (_symbol, tf) => tf === TIMEFRAMES.REGIME ? f4 : tf === TIMEFRAMES.SETUP ? h1 : m15 }; const signal = await generateSignal(options.symbol, { marketDataProvider: provider, timestamp: candle.time }); const record = signalRecord(signal, candle); signals.push(record); if (!open && record.action !== 'WAIT') open = openTrade(record, options); } return { symbol: options.symbol, period, options: { feeRate: options.feeRate, slippageRate: options.slippageRate, stopLossPercent: options.stopLossPercent, takeProfitPercent: options.takeProfitPercent, sameCandleRule: options.sameCandleRule }, signals, trades, metrics: metrics(trades, signals, options.initialEquity) }; }
+export async function runBacktest(input = {}) { const options = { ...DEFAULT_BACKTEST_OPTIONS, ...input }; const now = options.now ?? Number.MAX_SAFE_INTEGER; const fourHour = normalizeFrame(input.fourHourCandles ?? [], '4H', MS['4h'], now); const oneHour = normalizeFrame(input.oneHourCandles ?? [], '1H', MS['1h'], now); const fifteen = normalizeFrame(input.fifteenMinuteCandles ?? [], '15M', MS['15m'], now); if (options.strictSpacing) { assertAligned(fourHour, '4H', MS['4h']); assertAligned(oneHour, '1H', MS['1h']); assertAligned(fifteen, '15M', MS['15m']); } const period = { start: fifteen[0].time, end: fifteen.at(-1).time, partitions: options.partitions ?? null }; const signals = [], trades = [], ignoredSignals = []; let open = null; for (const candle of fifteen) { if (open && candle.time > open.entryTime) { const closed = advanceTrade(open, candle, options); if (closed) { trades.push(closed); open = null; } } const at = candle.closeTime ?? candle.time + MS['15m'] - 1; const f4 = completedAt(fourHour, at, MS['4h']); const h1 = completedAt(oneHour, at, MS['1h']); const m15 = completedAt(fifteen, at, MS['15m']); if (f4.length < MINIMUM_CANDLES.analysis || h1.length < MINIMUM_CANDLES.analysis || m15.length < MINIMUM_CANDLES.analysis) continue; const provider = { getTicker: async () => ({ lastPrice: String(candle.close), priceChangePercent: '0', quoteVolume: String(candle.volume) }), getCandles: async (_symbol, tf) => tf === TIMEFRAMES.REGIME ? f4 : tf === TIMEFRAMES.SETUP ? h1 : m15 }; const signal = await generateSignal(options.symbol, { marketDataProvider: provider, timestamp: candle.time }); const record = signalRecord(signal, candle); signals.push(record); if (record.action !== 'WAIT') { if (open) ignoredSignals.push({ ...record, ignoredReason: 'SIGNAL_IGNORED_OPEN_POSITION' }); else open = openTrade(record, options); } } const computedMetrics = metrics(trades, signals, options.initialEquity); computedMetrics.longSignals = signals.filter((s) => s.action === 'LONG').length; computedMetrics.shortSignals = signals.filter((s) => s.action === 'SHORT').length; computedMetrics.waitSignals = signals.filter((s) => s.action === 'WAIT').length; computedMetrics.ignoredSignals = ignoredSignals.length; return { symbol: options.symbol, period, dataSource: options.dataSource ?? 'synthetic sample', synthetic: Boolean(options.synthetic), dataQuality: options.dataQuality ?? null, options: { initialEquity: options.initialEquity, feeRate: options.feeRate, slippageRate: options.slippageRate, stopLossPercent: options.stopLossPercent, takeProfitPercent: options.takeProfitPercent, sameCandleRule: options.sameCandleRule, positionPolicy: 'ONE_OPEN_POSITION_PER_SYMBOL' }, signals, ignoredSignals, trades, metrics: computedMetrics }; }
 
-export function formatBacktestReport(result) { const m = result.metrics; return `AURION BACKTEST\n----------------\nPeriod: ${new Date(result.period.start).toISOString()} - ${new Date(result.period.end).toISOString()}\nSymbol: ${result.symbol}\nSignals: ${m.totalSignals}\nTrades: ${m.totalTrades}\nWin rate: ${(m.winRate * 100).toFixed(2)}%\nNet P&L: ${m.netPnl.toFixed(2)}\nProfit factor: ${Number.isFinite(m.profitFactor) ? m.profitFactor.toFixed(2) : 'Infinity'}\nMax drawdown: ${m.maxDrawdown.toFixed(2)}\nLONG: ${m.longPerformance.trades} trades / ${m.longPerformance.netPnl.toFixed(2)} P&L\nSHORT: ${m.shortPerformance.trades} trades / ${m.shortPerformance.netPnl.toFixed(2)} P&L`; }
+function pct(value) { return `${(value * 100).toFixed(2)}%`; }
+function sideReport(label, perf) { const wr = perf.trades ? perf.wins / perf.trades : 0; return `${label}:
+Trades: ${perf.trades}
+Win rate: ${pct(wr)}
+P&L: ${perf.netPnl.toFixed(2)}`; }
+
+export function formatBacktestReport(result) { const m = result.metrics; const quality = result.dataQuality; return `AURION BACKTEST
+================
+${result.synthetic ? 'SYNTHETIC TEST DATA — NOT REAL MARKET PERFORMANCE\n' : ''}
+Symbol: ${result.symbol}
+Period: ${new Date(result.period.start).toISOString()} - ${new Date(result.period.end).toISOString()}
+Data source: ${result.dataSource ?? 'provided candles'}
+Initial equity: ${result.options.initialEquity.toFixed(2)}
+
+Signals: ${m.totalSignals}
+Trades: ${m.totalTrades}
+
+Win rate: ${pct(m.winRate)}
+Net P&L: ${m.netPnl.toFixed(2)}
+Profit factor: ${Number.isFinite(m.profitFactor) ? m.profitFactor.toFixed(2) : 'Infinity'}
+Max drawdown: ${m.maxDrawdown.toFixed(2)}
+Average trade: ${m.averageTrade.toFixed(2)}
+
+${sideReport('LONG', m.longPerformance)}
+
+${sideReport('SHORT', m.shortPerformance)}
+
+Fees: ${result.options.feeRate}
+Slippage: ${result.options.slippageRate}
+Position policy: one open simulated position per symbol; additional LONG/SHORT signals are recorded as SIGNAL_IGNORED_OPEN_POSITION.
+
+Signal frequency:
+Total LONG signals: ${m.longSignals}
+Total SHORT signals: ${m.shortSignals}
+Total WAIT signals: ${m.waitSignals}
+Executed trades: ${m.totalTrades}
+Ignored signals: ${m.ignoredSignals}
+
+Data quality:
+4H candles: ${quality?.fourHourCandles ?? 'n/a'}
+1H candles: ${quality?.oneHourCandles ?? 'n/a'}
+15M candles: ${quality?.fifteenMinuteCandles ?? 'n/a'}
+Skipped/invalid candles: ${quality?.skippedInvalidCandles ?? 0}`; }
