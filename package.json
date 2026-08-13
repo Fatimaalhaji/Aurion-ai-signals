@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "python3 -m http.server 5173",
-    "build": "node --check src/main.js && node --check src/mtfEngine.mjs",
+    "build": "find src -name '*.js' -o -name '*.mjs' | sort | xargs -n 1 node --check",
     "test": "python3 -m unittest discover -s tests"
   }
 }

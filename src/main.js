@@ -1,7 +1,8 @@
-import { generateMTFSignal } from './mtfEngine.mjs';
+import { API_CONFIG, SUPPORTED_SYMBOLS } from './aurion/config/index.mjs';
+import { generateSignal } from './aurion/signals/engine.mjs';
 
-const SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'AVAXUSDT'];
-const POLL_MS = 15000;
+const SYMBOLS = SUPPORTED_SYMBOLS;
+const POLL_MS = API_CONFIG.pollMs;
 
 const elements = {
   grid: document.querySelector('#signalsGrid'),
@@ -74,7 +75,7 @@ async function loadSignals() {
 
   try {
     const cache = new Map();
-    const settled = await Promise.allSettled(SYMBOLS.map((symbol) => generateMTFSignal(symbol, { cache })));
+    const settled = await Promise.allSettled(SYMBOLS.map((symbol) => generateSignal(symbol, { cache })));
     const failures = settled.filter((result) => result.status === 'rejected');
     const signals = settled
       .filter((result) => result.status === 'fulfilled')

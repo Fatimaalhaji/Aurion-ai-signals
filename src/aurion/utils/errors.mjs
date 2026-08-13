@@ -1,0 +1,3 @@
+export class AurionError extends Error { constructor(message, code, details = {}) { super(message); this.name = 'AurionError'; this.code = code; this.details = details; } }
+export const ERROR_CODES = { INSUFFICIENT_CANDLES:'INSUFFICIENT_CANDLES', INVALID_CANDLE:'INVALID_CANDLE', BINANCE_ERROR:'BINANCE_ERROR', RATE_LIMIT:'RATE_LIMIT', NETWORK_ERROR:'NETWORK_ERROR', UNSUPPORTED_SYMBOL:'UNSUPPORTED_SYMBOL', UNSUPPORTED_TIMEFRAME:'UNSUPPORTED_TIMEFRAME' };
+export function ensureSupported(value, supported, code, label) { if (!supported.includes(value)) throw new AurionError(`Unsupported ${label}: ${value}`, code, { value, supported }); }
