@@ -49,4 +49,37 @@ class HistoricalDataTest(unittest.TestCase):
   sample=subprocess.run(['npm','run','backtest:sample'],cwd=ROOT,capture_output=True,text=True)
   self.assertEqual(sample.returncode,0,sample.stderr); self.assertIn('SYNTHETIC TEST DATA — NOT REAL MARKET PERFORMANCE',sample.stdout)
 
+class DatasetValidationWorkflowTest(unittest.TestCase):
+ def write_dataset(self, base, broken=False):
+  start=1735689600000
+  for tf,step,count in [('15m',900000,4),('1h',3600000,4),('4h',14400000,4)]:
+   rows=['timestamp,open,high,low,close,volume']
+   for i in range(count):
+    ts=start+i*step
+    if broken and tf=='1h' and i==2: ts=start+(i+1)*step
+    rows.append(f"{ts},100,101,99,100.5,10")
+   (base/f'{tf}.csv').write_text('\n'.join(rows))
+
+ def test_validate_data_cli_pass_and_fail(self):
+  with tempfile.TemporaryDirectory() as td:
+   base=Path(td); self.write_dataset(base)
+   r=subprocess.run(['npm','run','validate:data','--','--symbol','BTCUSDT','--data',td],cwd=ROOT,capture_output=True,text=True)
+   self.assertEqual(r.returncode,0,r.stderr); self.assertIn('Status: PASS',r.stdout); self.assertIn('4H:',r.stdout); self.assertIn('missing intervals: 0',r.stdout)
+  with tempfile.TemporaryDirectory() as td:
+   base=Path(td); self.write_dataset(base, broken=True)
+   r=subprocess.run(['npm','run','validate:data','--','--symbol','BTCUSDT','--data',td],cwd=ROOT,capture_output=True,text=True)
+   self.assertNotEqual(r.returncode,0); self.assertIn('Status: FAIL',r.stdout); self.assertIn('missing intervals: 1',r.stdout)
+
+ def test_manifest_summary_and_backtest_refuses_invalid_real_data(self):
+  with tempfile.TemporaryDirectory() as td:
+   base=Path(td); self.write_dataset(base, broken=True)
+   (base/'manifest.json').write_text(json.dumps({'symbol':'BTCUSDT','timeframes':['4h','1h','15m'],'source':'unit-test','dateRange':{'start':'2025-01-01T00:00:00Z','end':'2025-01-01T12:00:00Z'},'timezone':'UTC','generatedAt':'2026-08-13T00:00:00Z','rowCounts':{'4h':4,'1h':4,'15m':4}}))
+   js=f"""import {{readDatasetManifest, summarizeManifest}} from '{ROOT/'src/aurion/backtest/datasetValidation.mjs'}';
+   const manifest=await readDatasetManifest('{td}');
+   console.log(JSON.stringify(summarizeManifest(manifest)));"""
+   d=json.loads(run_node(js).stdout.strip())
+   self.assertEqual(d['source'],'unit-test'); self.assertEqual(d['rowCounts']['15m'],4)
+   r=subprocess.run(['node','scripts/backtest.mjs','--symbol','BTCUSDT','--data',td],cwd=ROOT,capture_output=True,text=True)
+   self.assertNotEqual(r.returncode,0); self.assertIn('Real-data backtest refused',r.stderr); self.assertIn('Status: FAIL',r.stderr)
+
 if __name__=='__main__': unittest.main()
