@@ -1,5 +1,6 @@
 import { runBacktest, formatBacktestReport } from '../src/aurion/backtest/index.mjs';
 import { loadHistoricalDataset } from '../src/aurion/backtest/historicalData.mjs';
+import { formatDatasetValidationReport, validateDataset } from '../src/aurion/backtest/datasetValidation.mjs';
 
 function candles(tfMs, count, slope = 0.45) {
   const start = Date.UTC(2025, 0, 1);
@@ -28,6 +29,8 @@ Object.keys(common).forEach((key) => common[key] === undefined && delete common[
 
 let input;
 if (args.data && !args.sample) {
+  const validation = await validateDataset({ symbol, dataDir: args.data });
+  if (!validation.pass) throw new Error(`Real-data backtest refused because dataset validation failed. Run npm run validate:data -- --symbol ${symbol} --data ${args.data}\n${formatDatasetValidationReport(validation)}`);
   input = { ...await loadHistoricalDataset({ symbol, dataDir: args.data, from: args.from, to: args.to }), ...common, strictSpacing: true };
 } else {
   input = { ...common, symbol, synthetic: true, dataSource: 'generated deterministic candles', fourHourCandles: candles(4 * 60 * 60 * 1000, 260), oneHourCandles: candles(60 * 60 * 1000, 1100), fifteenMinuteCandles: candles(15 * 60 * 1000, 4400), dataQuality: { fourHourCandles: 260, oneHourCandles: 1100, fifteenMinuteCandles: 4400, skippedInvalidCandles: 0 } };

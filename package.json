@@ -8,6 +8,7 @@
     "build": "find src -name '*.js' -o -name '*.mjs' | sort | xargs -n 1 node --check",
     "test": "python3 -m unittest discover -s tests",
     "backtest": "node scripts/backtest.mjs",
-    "backtest:sample": "node scripts/backtest.mjs --sample"
+    "backtest:sample": "node scripts/backtest.mjs --sample",
+    "validate:data": "node scripts/validate-data.mjs"
   }
 }
