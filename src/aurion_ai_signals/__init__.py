@@ -1,4 +1,4 @@
-"""Aurion AI Signals application package."""
+"""Aurion AI Signals package."""
 
 __all__ = ["__version__"]
 
