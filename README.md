@@ -1,56 +1,63 @@
-# Aurion-ai-signals
+### Aurion AI Signals
 
-Aurion AI Signals is intended to become an AI-assisted market signal research and delivery tool. The project will focus on collecting market data, analyzing it with configurable signal logic, and presenting actionable insights for review before any trading decision is made.
+Aurion AI Signals is a live crypto signal dashboard. It pulls public Binance spot data, refreshes automatically, and turns real market structure into actionable insights. 
 
-## Current Status
+### Features
 
-This repository is currently an initial scaffold and is not yet runnable. No production application code, runtime entrypoint, or automated test suite has been implemented yet.
+* Live Binance ticker and 15-minute candle data for major USDT crypto pairs.
+* Automatic refresh every 15 seconds plus a manual refresh button.
+* Signal scoring based on RSI, moving-average momentum, 24-hour change, volume, and range position.
+* Trade-plan cards with entry, target, stop, confidence, and trend context.
+* Responsive dark trading-terminal interface.
 
-## Planned Tech Stack and Direction
+Signals are informational only and are not financial advice. 
 
-The planned implementation direction is to build a modular application with:
+### Running the Scaffold
 
-- A data ingestion layer for market, indicator, and news or sentiment inputs.
-- Signal-generation services that combine rule-based analysis with AI-assisted interpretation.
-- A backend API for managing assets, signal configuration, and generated signal history.
-- A frontend dashboard for reviewing signals, confidence, rationale, and status.
-- Automated tests for core signal logic, API behavior, and any critical data-processing flows.
+### Backend Setup (Python)
 
-Specific frameworks, libraries, and infrastructure choices are still to be finalized as the project evolves.
+bash
 
-## Setup
+PYTHONPATH=src python -m aurion_ai_signals
 
-At this stage, setup is minimal because the application has not been implemented yet.
+Use code with caution.
 
-1. Clone the repository:
+**Expected output:** 
 
-   ```bash
-   git clone <repository-url>
-   cd Aurion-ai-signals
-   ```
+text
 
-2. Review this README for the current project status and planned direction.
+Aurion AI Signals scaffold is running.
 
-3. No dependency installation command is available yet. Add one here after the project language, package manager, and framework are selected.
+Use code with caution.
 
-## Run
+### Frontend Setup (Node.js)
 
-No run command is available yet because the application entrypoint has not been created.
+bash
 
-Future versions should document the exact command here, for example:
+npm install
+npm run start
 
-```bash
-# Example only; not currently available
-npm run dev
-```
+Use code with caution.
 
-## Test
+### Testing
 
-No test command is available yet because the automated test suite has not been created.
+Run the smoke test suite with Python's standard library test runner: 
 
-Future versions should document the exact command here, for example:
+bash
 
-```bash
-# Example only; not currently available
-npm test
-```
+python -m unittest discover -s tests
+
+Use code with caution.
+
+### Production Build
+
+bash
+
+npm run build
+%%MAGIT_PARSER_PROTECT%%```</CreativeWritingPad>
+
+To finish resolving this, paste this text into the editor, remove the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`), and click **Mark as resolved**.
+
+Would you like me to add any specific **installation prerequisites** or **environment variables** to this document?
+
+Use code with caution.
