@@ -8,6 +8,7 @@ export { normalizeCandle, prepareCandles, normalizeCandles } from './aurion/data
 export { getCandles, getTicker } from './services/binance/client.mjs';
 export { clamp, calculateRsi, ema, slopePercent, momentumPercent } from './aurion/indicators/index.mjs';
 export { structureBias, findSwingPoints, analyzeMarketStructure } from './aurion/structure/index.mjs';
+export { findConfirmedSwings, detectBOS, detectCHoCH, findLiquidityLevels, detectLiquiditySweeps, findFairValueGaps, detectFVGMitigations, findOrderBlocks, analyzeSMC, analyzeMTFSMC } from './aurion/smc/index.mjs';
 export { analyzeCandles, analyze4HCandles, analyze1HCandles, analyze15MCandles, calculateMTFConfidence, decideMTFAction, analyzeMTF } from './aurion/mtf/analyzer.mjs';
 export { generateMTFSignal, generateSignal } from './aurion/signals/engine.mjs';
 export async function analyze4H(symbol, options = {}) { const { getCandles } = await import('./services/binance/client.mjs'); const { analyze4HCandles } = await import('./aurion/mtf/analyzer.mjs'); return { symbol, ...analyze4HCandles(await getCandles(symbol, '4h', options)) }; }
