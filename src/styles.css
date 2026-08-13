@@ -26,7 +26,7 @@ h2 { margin: 0; font-size: clamp(1.7rem, 3vw, 2.6rem); letter-spacing: -0.04em; 
 .pulse-panel p { color: #cbd5e1; line-height: 1.6; }
 .pulse-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .pulse-grid div { background: rgba(15, 23, 42, 0.9); border-radius: 18px; padding: 14px; }
-.pulse-grid span, .metric-row span, .trade-plan span { display: block; color: #94a3b8; font-size: 0.78rem; margin-bottom: 6px; }
+.pulse-grid span, .metric-row span, .trade-plan span, .timeframe-grid span { display: block; color: #94a3b8; font-size: 0.78rem; margin-bottom: 6px; }
 .pulse-grid b { font-size: 1.35rem; }
 .error { margin-top: 22px; padding: 16px 18px; display: flex; gap: 10px; align-items: center; color: #fecaca; border-color: rgba(248, 113, 113, 0.45); }
 .signals-header { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin: 46px 0 20px; }
@@ -34,9 +34,9 @@ h2 { margin: 0; font-size: clamp(1.7rem, 3vw, 2.6rem); letter-spacing: -0.04em; 
 .signals-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
 .signal-card { padding: 22px; min-height: 315px; position: relative; overflow: hidden; }
 .signal-card::before { content: ''; position: absolute; inset: 0 0 auto; height: 4px; background: #94a3b8; }
-.signal-card.buy::before { background: linear-gradient(90deg, #22c55e, #a3e635); }
-.signal-card.sell::before { background: linear-gradient(90deg, #fb7185, #f97316); }
-.signal-card.hold::before { background: linear-gradient(90deg, #38bdf8, #818cf8); }
+.signal-card.buy::before, .signal-card.long::before { background: linear-gradient(90deg, #22c55e, #a3e635); }
+.signal-card.sell::before, .signal-card.short::before { background: linear-gradient(90deg, #fb7185, #f97316); }
+.signal-card.hold::before, .signal-card.wait::before { background: linear-gradient(90deg, #38bdf8, #818cf8); }
 .card-topline { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .pair { margin: 0 0 8px; color: #cbd5e1; font-weight: 800; }
 h3 { margin: 0; font-size: 1.8rem; letter-spacing: -0.04em; }
@@ -46,13 +46,15 @@ h3 { margin: 0; font-size: 1.8rem; letter-spacing: -0.04em; }
 .negative { color: #fda4af; }
 .meter { height: 9px; border-radius: 999px; background: rgba(148, 163, 184, 0.16); overflow: hidden; margin-top: 10px; }
 .meter span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #38bdf8, #5eead4, #a3e635); }
-.trade-plan { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 22px; }
-.trade-plan div { background: rgba(2, 6, 23, 0.42); border-radius: 15px; padding: 12px 10px; }
-.trade-plan strong { font-size: 0.88rem; }
+.trade-plan, .timeframe-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 22px; }
+.timeframe-grid { grid-template-columns: repeat(2, 1fr); }
+.trade-plan div, .timeframe-grid div { background: rgba(2, 6, 23, 0.42); border-radius: 15px; padding: 12px 10px; }
+.trade-plan strong, .timeframe-grid strong { font-size: 0.88rem; }
+.explanation { color: #cbd5e1; font-size: 0.88rem; line-height: 1.5; margin: 14px 0 0; }
 .indicators { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .indicators span { padding: 7px 9px; border-radius: 999px; background: rgba(94, 234, 212, 0.08); color: #dbeafe; font-size: 0.77rem; }
 .skeleton { min-height: 315px; background: linear-gradient(100deg, rgba(15, 23, 42, 0.72), rgba(51, 65, 85, 0.5), rgba(15, 23, 42, 0.72)); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
 @keyframes shimmer { to { background-position-x: -200%; } }
 footer { color: #94a3b8; text-align: center; margin-top: 34px; font-size: 0.92rem; }
 @media (max-width: 980px) { .hero { grid-template-columns: 1fr; } .signals-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px) { main { width: min(100% - 20px, 1180px); padding-top: 20px; } .hero-copy, .pulse-panel, .signal-card { border-radius: 22px; padding: 22px; } .signals-header { display: block; } .signals-grid { grid-template-columns: 1fr; } .pulse-grid, .trade-plan { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { main { width: min(100% - 20px, 1180px); padding-top: 20px; } .hero-copy, .pulse-panel, .signal-card { border-radius: 22px; padding: 22px; } .signals-header { display: block; } .signals-grid { grid-template-columns: 1fr; } .pulse-grid, .trade-plan, .timeframe-grid { grid-template-columns: 1fr; } }
