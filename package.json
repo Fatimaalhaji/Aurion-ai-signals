@@ -1,0 +1,10 @@
+{
+  "name": "aurion-ai-signals",
+  "version": "1.0.0",
+  "description": "Live crypto signals dashboard powered by real market data.",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 5173",
+    "build": "node --check src/main.js"
+  }
+}
