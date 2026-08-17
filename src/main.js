@@ -1,5 +1,8 @@
-import { SUPPORTED_SYMBOLS } from './aurion/config/index.mjs';
-import { filterMarkets, formatCompact, formatUsd, marketStatus, renderMarketDetail, renderMarketOverview, sharedMarketSignalService } from './markets/markets.mjs';
+import { API_CONFIG, SUPPORTED_SYMBOLS } from './aurion/config/index.mjs';
+import { loadGeneratedSignals } from './aurion/signals/signalService.mjs';
+
+const SYMBOLS = SUPPORTED_SYMBOLS;
+const POLL_MS = API_CONFIG.pollMs;
 
 const elements = {
   app: document.querySelector('#app'),
@@ -39,11 +42,21 @@ function renderSimple(title, body) { renderShell(`<main><section class="hero-cop
 
 function renderRoute() { if (location.pathname === '/markets') renderMarkets(); else if (location.pathname === '/signals') renderDashboard(); else if (location.pathname === '/backtest') renderSimple('Backtest Center', 'Use npm run backtest:sample or the CLI backtest module for deterministic historical validation.'); else if (location.pathname === '/history') renderSimple('Signal History', 'Signal history remains available through the existing in-memory domain model.'); else if (location.pathname === '/settings') renderSimple('Settings', 'Public market-data configuration only. No exchange private keys or order endpoints are stored.'); else renderDashboard(); }
 
-function bind() {
-  document.querySelector('#refreshButton')?.addEventListener('click', () => sharedMarketSignalService.refresh());
-  document.querySelector('#marketSearch')?.addEventListener('input', (event) => { query = event.target.value; renderMarkets(); });
-  document.querySelector('#marketFilter')?.addEventListener('change', (event) => { filter = event.target.value; renderMarkets(); });
-  document.querySelectorAll('[data-symbol]').forEach((button) => button.addEventListener('click', () => { selectedSymbol = button.dataset.symbol; renderMarkets(); }));
+  try {
+    const { signals: generatedSignals, failures } = await loadGeneratedSignals({ symbols: SYMBOLS });
+    const signals = generatedSignals.sort((a, b) => b.confidence - a.confidence);
+    if (!signals.length) throw new Error('No live crypto data was returned. Binance may be rate limiting requests.');
+    renderSignals(signals);
+    renderPulse(signals);
+    elements.refreshStatus.textContent = `Updated ${new Date().toLocaleTimeString()} from Binance MTF candle data${failures.length ? ` (${failures.length} symbols delayed)` : ''}`;
+  } catch (error) {
+    elements.error.textContent = error.message;
+    elements.error.classList.remove('hidden');
+    elements.refreshStatus.textContent = 'Live feed temporarily unavailable';
+  } finally {
+    elements.refreshButton.disabled = false;
+    elements.refreshButton.classList.remove('loading');
+  }
 }
 
 sharedMarketSignalService.addEventListener('change', renderRoute);

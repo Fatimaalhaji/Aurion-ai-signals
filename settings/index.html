@@ -7,7 +7,44 @@
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <div id="app"></div>
+    <main>
+      <nav class="top-nav" aria-label="Primary"><a href="/">Dashboard</a><a href="/signals">Signals</a><a href="/backtest">Backtest</a><a href="/history">Signal History</a><a href="/markets">Markets</a><a class="active" href="/settings">Settings</a></nav>
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow">◉ Live crypto signal engine</div>
+          <h1>Real-time AI-style crypto signals from live Binance market data.</h1>
+          <p>Aurion now refreshes prices, 15-minute candles, momentum, RSI, volume, targets, and stops automatically so signals feel active and grounded in current market structure.</p>
+          <div class="hero-actions">
+            <button id="refreshButton" type="button">↻ Refresh live signals</button>
+            <span id="refreshStatus">Connecting to live market data...</span>
+          </div>
+        </div>
+        <aside class="pulse-panel">
+          <div class="panel-title">▰ Market pulse</div>
+          <strong id="pulseBias">Neutral</strong>
+          <p id="pulseAverage">Waiting for live crypto data...</p>
+          <div class="pulse-grid">
+            <div><span>Buy setups</span><b id="buyCount">0</b></div>
+            <div><span>Sell setups</span><b id="sellCount">0</b></div>
+            <div><span>Refresh</span><b>15s</b></div>
+          </div>
+        </aside>
+      </section>
+
+      <div id="error" class="error hidden"></div>
+
+      <section class="signals-header">
+        <div>
+          <p class="eyebrow">⚡ Signal board</p>
+          <h2>Highest-confidence opportunities</h2>
+        </div>
+        <p>▣ Uses RSI, moving-average momentum, 24h change, and range position.</p>
+      </section>
+
+      <section id="signalsGrid" class="signals-grid" aria-live="polite"></section>
+
+      <footer>Signals are informational only, not financial advice. Always confirm liquidity, news, and risk before trading.</footer>
+    </main>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
