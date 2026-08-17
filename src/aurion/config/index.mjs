@@ -1,4 +1,4 @@
-export const SUPPORTED_SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'AVAXUSDT'];
+export const SUPPORTED_SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT'];
 export const TIMEFRAMES = { REGIME: '4h', SETUP: '1h', ENTRY: '15m' };
 export const DISPLAY_TIMEFRAMES = { REGIME: '4H', SETUP: '1H', ENTRY: '15M' };
 export const API_CONFIG = { binanceBaseUrl: 'https://api.binance.com/api/v3', pollMs: 15000 };

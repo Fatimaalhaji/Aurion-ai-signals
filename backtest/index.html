@@ -1,3 +1,15 @@
 <!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurion AI Signals</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
 <html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Aurion Backtest Center</title><link rel="stylesheet" href="/src/styles.css" /></head>
 <body><main data-page="backtest"><nav class="top-nav"><a href="/">Dashboard</a><a href="/signals/">Signals Center</a><a class="active" href="/backtest/">Backtest Center</a></nav><section class="backtest-hero"><div><p class="eyebrow">▰ AURION Backtest Center</p><h1>AURION BACKTEST</h1><p>Run historical simulations through the existing AURION backtest domain engine and the same signal engine used by live analysis.</p><strong id="sampleWarning" class="sample-warning hidden">SYNTHETIC SAMPLE — NOT REAL MARKET DATA</strong></div></section><section class="backtest-layout"><form id="backtestForm" class="control-panel"><label>Symbol<select id="symbol"><option>BTCUSDT</option><option>ETHUSDT</option><option>SOLUSDT</option><option>BNBUSDT</option><option>XRPUSDT</option></select></label><label>Start date<input id="startDate" type="date" /></label><label>End date<input id="endDate" type="date" /></label><label>Fee<input id="fee" type="number" min="0" step="0.0001" value="0.001" /></label><label>Slippage<input id="slippage" type="number" min="0" step="0.0001" value="0.0005" /></label><label>Initial equity<input id="initialEquity" type="number" min="1" step="100" value="10000" /></label><label class="checkbox"><input id="sampleMode" type="checkbox" /> Use synthetic sample mode</label><button type="submit">Run Backtest</button><p id="stateLabel">Idle</p></form><div class="panel"><h2>Data Validation</h2><div id="validationGrid" class="validation-grid"></div><div id="qualityReport"></div><div id="error" class="error hidden"></div></div></section><section id="results" class="hidden"><div id="metricsGrid" class="metrics-grid"></div><div class="panel"><h2>Long / Short Breakdown</h2><div id="breakdownGrid" class="metrics-grid"></div></div><div class="panel"><h2>Equity Curve</h2><canvas id="equityChart" width="1000" height="260"></canvas></div><div class="panel"><h2>Signal Summary</h2><div id="signalSummary"></div></div><div class="panel table-panel"><h2>Simulated Trades</h2><table><thead><tr><th>Entry Time</th><th>Exit Time</th><th>Symbol</th><th>Direction</th><th>Entry</th><th>Exit</th><th>Stop Loss</th><th>Take Profit</th><th>P&L</th><th>Fees</th><th>Result</th></tr></thead><tbody id="tradeRows"></tbody></table></div></section><footer>Historical backtesting is offline/local-data based and does not execute trades.</footer></main><script type="module" src="/src/backtestCenter.js"></script></body></html>
