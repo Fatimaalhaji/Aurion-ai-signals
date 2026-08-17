@@ -4,7 +4,22 @@ Live crypto signals dashboard powered by Binance market data and a deterministic
 
 ## Current Status
 
-Phase 1.5 prepares the production module boundaries for future AURION work without adding live trading, order execution, fake AI/ML, or advanced SMC logic.
+Phase 4C adds a dedicated Signal History page without changing MTF, SMC, BOS/CHoCH, or signal-generation logic. The product still does not include live trading, order execution, fake AI/ML claims, API secrets, or database persistence.
+
+## Pages
+
+- `/` — Dashboard using the existing live signal-generation path.
+- `/signals` — Signals view using the same dashboard signal path.
+- `/backtest` — Backtest entry page.
+- `/history` — Signal History view of stored AURION Signal records.
+- `/markets` — Markets entry page.
+- `/settings` — Settings entry page.
+
+## Signal History
+
+Signal History is implemented in `src/aurion/history/signalHistory.mjs` as an in-memory domain boundary. It stores only valid existing Signal records emitted by the shared signal service and exposes deterministic query filters for action, symbol, and chronological sorting.
+
+The current implementation intentionally has no database and no browser-local persistence. A persistent adapter can be added later behind the same history boundary without moving trading logic into the UI.
 
 ## Run
 
@@ -31,8 +46,11 @@ aurion-ai-signals: ok
 ```bash
 npm test
 npm run build
+npm run backtest:sample
+PYTHONPATH=src python3 -m aurion_ai_signals
+git diff --check
 ```
 
 ## Architecture
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the Market Data → Indicators → Structure → SMC → MTF → Signal Engine → Risk → Backtest → Dashboard flow.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the Market Data → Indicators → Structure → SMC → MTF → Signal Engine → Signal History → Dashboard flow.

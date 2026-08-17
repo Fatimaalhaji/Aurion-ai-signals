@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Aurion Signal History</title><link rel="stylesheet" href="/src/styles.css" /></head>
+  <body>
+    <main>
+      <nav class="top-nav" aria-label="Primary"><a href="/">Dashboard</a><a href="/signals">Signals</a><a href="/backtest">Backtest</a><a class="active" href="/history">Signal History</a><a href="/markets">Markets</a><a href="/settings">Settings</a></nav>
+      <section class="hero history-hero"><div class="hero-copy"><div class="eyebrow">▤ Signal History</div><h1>AURION signal record.</h1><p>Chronological in-memory records captured from the existing signal engine. No database, fake data, UI trading calculations, or order execution are used in this phase.</p></div></section>
+      <div id="historyError" class="error hidden"></div>
+      <section class="history-panel">
+        <div class="history-toolbar">
+          <label>Signal <select id="actionFilter"><option>ALL</option><option>LONG</option><option>SHORT</option><option>WAIT</option></select></label>
+          <label>Symbol <input id="symbolFilter" type="search" placeholder="BTC, ETH, SOL" /></label>
+          <label>Sort <select id="sortFilter"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></label>
+        </div>
+        <p id="historyEmpty" class="empty-state">No signals have been recorded yet. Visit the dashboard or signals page to generate live AURION signals in this browser session.</p>
+        <div class="history-table-wrap"><table class="history-table"><thead><tr><th>Time</th><th>Symbol</th><th>Signal</th><th>Confidence</th><th>Price</th><th>4H</th><th>1H</th><th>15M</th><th>Structure</th><th>Actions</th></tr></thead><tbody id="historyRows"></tbody></table></div>
+      </section>
+      <footer>Signals are informational only, not financial advice. Signal history is in-memory only.</footer>
+    </main><script type="module" src="/src/history.js"></script>
+  </body>
+</html>

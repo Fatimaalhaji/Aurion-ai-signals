@@ -1,5 +1,5 @@
 import { API_CONFIG, SUPPORTED_SYMBOLS } from './aurion/config/index.mjs';
-import { generateSignal } from './aurion/signals/engine.mjs';
+import { loadGeneratedSignals } from './aurion/signals/signalService.mjs';
 
 const SYMBOLS = SUPPORTED_SYMBOLS;
 const POLL_MS = API_CONFIG.pollMs;
@@ -74,13 +74,8 @@ async function loadSignals() {
   if (!elements.grid.children.length) renderSkeletons();
 
   try {
-    const cache = new Map();
-    const settled = await Promise.allSettled(SYMBOLS.map((symbol) => generateSignal(symbol, { cache })));
-    const failures = settled.filter((result) => result.status === 'rejected');
-    const signals = settled
-      .filter((result) => result.status === 'fulfilled')
-      .map((result) => result.value)
-      .sort((a, b) => b.confidence - a.confidence);
+    const { signals: generatedSignals, failures } = await loadGeneratedSignals({ symbols: SYMBOLS });
+    const signals = generatedSignals.sort((a, b) => b.confidence - a.confidence);
     if (!signals.length) throw new Error('No live crypto data was returned. Binance may be rate limiting requests.');
     renderSignals(signals);
     renderPulse(signals);
